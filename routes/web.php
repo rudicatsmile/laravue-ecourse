@@ -15,6 +15,8 @@ Route::get('/', function () {
 
 Route::resource('categories', CategoryController::class);
 
+
+//Dashboar
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
