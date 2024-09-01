@@ -3,27 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $title = "List Categories";
-        $categories = Category::all();                  //Select * from categories
-        //$categories = Category::where('id', 2)->get();  //Select * from categories where id=2
+        $title = 'Category';
+        $categories = Category::all();
+        $edit = false;
+        if($request->edit)
+                $edit = Category::whereSlug($request->edit)->first();
 
-
-        //Menggunakan Array
-        // return view('categories.listCategories',[
-        //     'judul' => $title
-        // ]);
-
-        return view('categories.listCategories', compact('title','categories'));
+        return view('pages.categories.indexCategories', compact('title', 'categories', 'edit'));
     }
 
     /**
@@ -31,7 +27,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('categories.createCategories');
+        //
     }
 
     /**
@@ -39,36 +35,26 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-
-        //VALIDASI
         $request->validate([
             'name' => 'required|min:3'
         ]);
 
         Category::create([
-            'name'=> $request->name,
-            'slug'=> Str::slug($request->name)
-
+            'name' => $request->name,
+            'slug' => Str::slug($request->name)
         ]);
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')->with('success', "Category Saved!");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Category $category)
-    {
-       return view('categories.showCategories', compact('category'));
-    }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        $category = Category::find($id);  //select * from category where id=$id
+        $category = Category::find($id); //select * from category where id= $id;
+
         return view('categories.editCategories', compact('category'));
     }
 
@@ -77,16 +63,14 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
-        $category = Category::find($id);  //select * from category where id=$id
+        $category = Category::find($id);
 
         $category->name = $request->name;
         $category->slug = Str::slug($request->name);
 
         $category->update();
 
-        return redirect()->route('categories.index');
-
+        return redirect()->route('categories.index')->with('success', "Category Updated!");
     }
 
     /**
@@ -95,8 +79,9 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::find($id);
+
         $category->delete();
 
-        return redirect()->route('categories.index');
+        return redirect()->route('categories.index')->with('success', "Category Deleted!");
     }
 }
